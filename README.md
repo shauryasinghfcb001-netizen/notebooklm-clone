@@ -103,3 +103,4 @@ POST .../studio/:kind?bg=1  → {job_id}   GET /api/jobs/:jid[/stream] (SSE prog
   (real voice on any normal network; the sandbox IP is rate-limited by Microsoft).
 - Video/slides/infographic render locally (ffmpeg via imageio-ffmpeg + Pillow).
 - Long audio/video generations run as background jobs with live SSE progress bars.
+
