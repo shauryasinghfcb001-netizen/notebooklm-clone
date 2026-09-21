@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=NotebookLM Clone
+Comment=Local-first AI research assistant
+Exec=XXX/.venv/bin/python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
+Path=XXX/backend
+Icon=XXX/backend/app/static/icon-512.png
+Terminal=true
+Type=Application
+Categories=Office;Education;
+StartupNotify=false

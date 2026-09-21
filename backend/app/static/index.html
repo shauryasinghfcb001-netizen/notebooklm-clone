@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>NotebookLM Clone</title>
+<link rel="manifest" href="/manifest.json"/>
+<link rel="icon" href="/icon.svg"/>
+<link rel="apple-touch-icon" href="/icon-192.png"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="NBClone"/>
+<meta name="theme-color" content="#0b0b0c"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#f6f1e4;color:#161613;font-size:14px}
+header{background:#0b0b0c;color:#fdfbf3;border-bottom:3px solid #c9a227;padding:10px 18px;display:flex;align-items:center;gap:12px}
+header b{font-size:16px}header .sub{opacity:.7;font-size:12px}
+header .sp{flex:1}header button,.btn{background:#fff;color:#111;border:1px solid #ddd;border-radius:8px;padding:7px 12px;cursor:pointer;font-size:13px}
+.btn.primary{background:#0b0b0c;color:#fff;border-color:#c9a227}.btn:disabled{opacity:.5}
+main{padding:16px;max-width:1400px;margin:0 auto}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.card{background:#fff;border:1px solid #e2e4e9;border-radius:12px;padding:14px;cursor:pointer}
+.card:hover{border-color:#0b0b0c}.card h3{font-size:15px;margin-bottom:6px}.card p{color:#666;font-size:12px}
+.card .row{display:flex;gap:6px;margin-top:10px}
+.cols{display:grid;grid-template-columns:280px 1fr 300px;gap:12px;height:calc(100vh - 130px)}
+.panel{background:#fff;border:1px solid #e2e4e9;border-radius:12px;display:flex;flex-direction:column;overflow:hidden}
+.panel h2{font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:#555;padding:10px 12px;border-bottom:1px solid #eee;display:flex;align-items:center;gap:8px}
+.panel .body{padding:10px;overflow:auto;flex:1}
+.src{display:flex;gap:8px;align-items:flex-start;border:1px solid #eee;border-radius:8px;padding:8px;margin-bottom:8px}
+.src .t{flex:1;min-width:0}.src .t b{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.src .t small{color:#777}.src button{border:none;background:#f1f2f4;border-radius:6px;padding:4px 7px;cursor:pointer}
+.addbox{display:grid;gap:6px;margin-bottom:10px}
+.addbox input,.addbox textarea,.chatinput input,select,input[type=text]{border:1px solid #d4d7dc;border-radius:8px;padding:8px;font-size:13px;width:100%}
+.msg{border:1px solid #eee;border-radius:10px;padding:10px;margin-bottom:10px;background:#fafbfc}
+.msg.user{background:#f4ecd7;border-color:#e2d3a8}.msg .cite{display:inline-block;background:#c9a227;color:#0b0b0c;font-weight:600;border-radius:20px;font-size:11px;padding:1px 8px;margin:2px;cursor:pointer}
+.quotes{margin-top:8px;border-top:1px dashed #ddd;padding-top:6px}.quotes small{display:block;color:#444;background:#fff;border:1px solid #eee;border-radius:6px;padding:5px 7px;margin:4px 0}
+.chatinput{display:flex;gap:8px;padding:10px;border-top:1px solid #eee}
+.toolgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.tool{border:1px solid #e2e4e9;border-radius:10px;padding:10px;cursor:pointer;background:#fafbfc;text-align:center}
+.tool:hover{border-color:#0b0b0c}.tool b{display:block;font-size:13px}.tool span{font-size:11px;color:#666}
+.art{border:1px solid #eee;border-radius:8px;padding:8px;margin-bottom:8px;cursor:pointer}.art:hover{border-color:#0b0b0c}
+.art small{color:#777}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:50}
+.sheet{background:#fff;border-radius:14px;max-width:760px;width:92%;max-height:88vh;overflow:auto;padding:18px}
+.sheet h3{margin-bottom:10px}.sheet pre{white-space:pre-wrap;background:#f6f7f9;border-radius:8px;padding:10px;font-size:13px}
+table.data{border-collapse:collapse;width:100%;font-size:12px}table.data th,table.data td{border:1px solid #ddd;padding:6px 8px;text-align:left}
+.fc{border:2px solid #0b0b0c;border-radius:12px;padding:24px;text-align:center;min-height:150px;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;margin-bottom:10px}
+.qchoice{display:block;border:1px solid #ddd;border-radius:8px;padding:8px;margin:6px 0;cursor:pointer;width:100%;text-align:left;background:#fff}
+.qchoice.right{border-color:#137333;background:#e6f4ea}.qchoice.wrong{border-color:#b3261e;background:#fce8e6}
+.toolbar{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+.pill{background:#f3ead0;border:1px solid #d9c98f;border-radius:20px;padding:3px 10px;font-size:12px}
+#notesDrawer{position:fixed;top:0;right:0;width:360px;max-width:92vw;height:100vh;background:#fff;border-left:1px solid #ddd;z-index:40;padding:14px;overflow:auto;display:none}
+#notesDrawer.open{display:block}
+textarea.note{width:100%;min-height:120px;border:1px solid #d4d7dc;border-radius:8px;padding:8px}
+@media(max-width:1000px){.cols{grid-template-columns:1fr;height:auto}.panel{min-height:300px}}
+</style></head>
+<body>
+<header><b>📓 NotebookLM <span style="color:#c9a227">Clone</span></b><span class="sub" id="prov">local-first · grounded RAG</span><span class="sp"></span>
+<button onclick="goHome()">🏠 Notebooks</button><button onclick="toggleNotes()">📝 Notes</button><span class="pill" id="quota" title="Click to reset daily quotas" style="cursor:pointer" onclick="resetQuota()"></span><span class="pill" id="health">…</span><span class="pill" id="userpill"></span></header>
+<main>
+<div id="dash">
+  <div class="toolbar"><button class="btn primary" onclick="newNotebook()">＋ New notebook</button><button class="btn" onclick="seedDemo()">✨ Load demo</button><span id="dashmeta" style="color:#666"></span></div>
+  <div class="cards" id="cards"></div>
+  <div id="analytics"></div>
+</div>
+<div id="nb" style="display:none">
+  <div class="toolbar"><button class="btn" onclick="goHome()">← All notebooks</button>
+    <input type="text" id="nbtitle" style="max-width:300px" onchange="renameNb()"/>
+    <span class="pill" id="nbsrc"></span><span class="pill" id="nbstat"></span>
+    <button class="btn" onclick="shareNb()">🔗 Share</button><button class="btn" onclick="membersMgr()">👥 Members</button></div>
+  <div class="cols">
+    <div class="panel"><h2>📚 Sources</h2><div class="body">
+      <div class="addbox">
+        <input type="file" id="f" accept=".pdf,.docx,.pptx,.txt,.md,.csv,.json"/>
+        <button class="btn primary" onclick="uploadFile()">Upload file</button>
+        <input type="text" id="u" placeholder="https:// article URL"/>
+        <button class="btn" onclick="addURL()">Add URL</button>
+        <input type="text" id="y" placeholder="YouTube link (public, captioned)"/>
+        <button class="btn" onclick="addYT()">Add YouTube</button>
+        <input type="text" id="pt" placeholder="Pasted text title"/>
+        <textarea id="px" rows="2" placeholder="Paste text…"></textarea>
+        <button class="btn" onclick="addPaste()">Add pasted text</button>
+        <button class="btn" onclick="doResearch()">🔎 Research web (add sources)</button>
+        <button class="btn" onclick="drivePicker()">📁 Google Drive</button>
+      </div>
+      <div id="sources"></div>
+    </div></div>
+    <div class="panel"><h2>💬 Chat (grounded in enabled sources)</h2><div class="body" id="chat"></div>
+      <div id="sugg" style="padding:0 10px;display:flex;gap:6px;flex-wrap:wrap"></div>
+      <div id="chatnotes" style="display:none;padding:6px 10px;background:#f3ead0;border-top:1px solid #d9c98f;font-size:12px"></div><div class="chatinput"><input id="q" placeholder="Ask about your sources…" onkeydown="if(event.key==='Enter')ask()"/>
+      <button class="btn primary" onclick="ask()">Ask</button></div></div>
+    <div class="panel"><h2>✨ Studio</h2><div class="body">
+      <div class="toolgrid">
+        <div class="tool" onclick="mkStudio('report')"><b>📄 Report</b><span>briefing / guide</span></div>
+        <div class="tool" onclick="mkStudio('flashcards')"><b>🗂 Flashcards</b><span>Q&A cards</span></div>
+        <div class="tool" onclick="mkStudio('quiz')"><b>❓ Quiz</b><span>test yourself</span></div>
+        <div class="tool" onclick="mkStudio('mindmap')"><b>🧠 Mind map</b><span>visual graph</span></div>
+        <div class="tool" onclick="mkStudio('datatable')"><b>📊 Data table</b><span>+ CSV export</span></div>
+        <div class="tool" onclick="mkStudio('audio')"><b>🎙 Audio</b><span>podcast + MP3</span></div>
+        <div class="tool" onclick="mkStudio('video')"><b>🎬 Video</b><span>narrated MP4</span></div>
+        <div class="tool" onclick="mkStudio('slides')"><b>📽 Slides</b><span>PPTX deck</span></div>
+        <div class="tool" onclick="mkStudio('infographic')"><b>🖼 Infographic</b><span>PNG visual</span></div>
+      </div>
+      <div id="arts"></div>
+    </div></div>
+  </div>
+</div>
+</main>
+<aside id="notesDrawer"><h3>📝 Notes <button class="btn" style="float:right" onclick="toggleNotes()">✕</button></h3>
+<div style="margin:10px 0"><button class="btn primary" onclick="newNote()">＋ New note</button></div><div id="notes"></div></aside>
+<div id="modal" style="display:none"></div>
+<script>
+let NB=null;
+const $=id=>document.getElementById(id);
+async function api(m,u,b,f){const o={method:m};if(f){o.body=f}else if(b){o.headers={'Content-Type':'application/json'};o.body=JSON.stringify(b)}const r=await fetch(u,o);if(!r.ok){let t=await r.text();throw new Error(t.slice(0,300))}return r.json()}
+function esc(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function show(html){$('modal').style.display='block';$('modal').innerHTML='<div class="modal" onclick="if(event.target===this)hide()"><div class="sheet">'+html+'</div></div>'}
+function hide(){$('modal').style.display='none';$('modal').innerHTML=''}
+async function init(){try{const h=await api('GET','/api/health');$('health').textContent='LLM: '+h.llm_provider;$('prov').textContent='local-first · '+h.llm_provider+' · '+(h.ffmpeg_ok?'ffmpeg ✓':'no ffmpeg')}catch(e){$('health').textContent='offline'}loadQuota();if('serviceWorker' in navigator){try{navigator.serviceWorker.register('/sw.js')}catch(e){}}loadDash();bootAuth()}
+async function loadDash(){const nbs=await api('GET','/api/notebooks');$('dashmeta').textContent=nbs.length+' notebooks';
+$('cards').innerHTML=nbs.map(n=>'<div class="card" onclick="openNb(\''+n.id+'\')"><h3>'+esc(n.title)+'</h3><p>'+(n.sources_count||0)+' sources · updated '+esc((n.updated_at||'').slice(0,10))+'</p><div class="row"><button class="btn" onclick="event.stopPropagation();dupNb(\''+n.id+'\')">Duplicate</button><button class="btn" onclick="event.stopPropagation();delNb(\''+n.id+'\')">Delete</button></div></div>').join('')||'<div style="color:#666"><p>No notebooks yet — create one, or:</p><p>1️⃣ ✨ Load demo for sample content · 2️⃣ Add PDF/URL/YouTube/Drive sources · 3️⃣ Ask with citations · 4️⃣ Studio → audio/quiz/mindmap</p><p>🔒 Local-first: sources stay on this device.</p></div>'}
+async function newNotebook(){const n=await api('POST','/api/notebooks',{title:'Untitled notebook'});openNb(n.id)}
+async function dupNb(id){await api('POST','/api/notebooks/'+id+'/duplicate');loadDash()}
+async function delNb(id){if(!confirm('Delete notebook?'))return;await api('DELETE','/api/notebooks/'+id);loadDash()}
+function goHome(){NB=null;$('nb').style.display='none';$('dash').style.display='block';loadDash()}
+async function openNb(id){NB=(await api('GET','/api/notebooks/'+id));$('dash').style.display='none';$('nb').style.display='block';$('nbtitle').value=NB.title;await refresh()}
+async function renameNb(){await api('PATCH','/api/notebooks/'+NB.id,{title:$('nbtitle').value});}
+async function refresh(){loadQuota();const [srcs,st,arts]=await Promise.all([api('GET','/api/notebooks/'+NB.id+'/sources'),api('GET','/api/notebooks/'+NB.id+'/stats'),api('GET','/api/notebooks/'+NB.id+'/studio')]);
+$('nbsrc').textContent=srcs.filter(s=>s.enabled).length+'/'+srcs.length+' sources enabled';$('nbstat').textContent=st.words+' words · '+st.chunks+' chunks';
+$('sources').innerHTML=srcs.map(s=>'<div class="src"><input type="checkbox" '+(s.enabled?'checked':'')+' onchange="toggleSrc(\''+s.id+'\',this.checked)" title="enable/disable"/><div class="t"><b>'+esc(s.title)+'</b><small>'+esc(s.kind)+' · '+s.word_count+' words</small></div><button onclick="previewSrc(\''+s.id+'\')">👁</button><button onclick="delSrc(\''+s.id+'\')">🗑</button></div>').join('')||'<p style="color:#777">No sources yet. Add files, URLs, YouTube or pasted text above.</p>';
+$('arts').innerHTML='<h4 style="margin:6px 0">Artifacts</h4>'+(arts.map(a=>'<div class="art" onclick="viewArt(\''+a.id+'\')"><b>'+esc(a.title)+'</b><br/><small>'+esc(a.kind)+' · '+esc((a.created_at||'').slice(5,16))+'</small></div>').join('')||'<p style="color:#777">No artifacts yet.</p>');
+const hist=await api('GET','/api/notebooks/'+NB.id+'/chat');renderChat(hist);
+try{const sg=await api('POST','/api/notebooks/'+NB.id+'/chat:suggest');$('sugg').innerHTML=(sg.prompts||[]).map(p=>'<button class="btn" style="font-size:12px" onclick="askSuggest(this)">'+esc(p)+'</button>').join('')}catch(e){}}
+function askSuggest(el){$('q').value=el.textContent;ask()}
+async function uploadFile(){const f=$('f').files[0];if(!f)return alert('Choose a file');const fd=new FormData();fd.append('file',f);$('f').value='';await api('POST','/api/notebooks/'+NB.id+'/sources:file',null,fd);refresh()}
+async function addURL(){const u=$('u').value.trim();if(!u)return;await api('POST','/api/notebooks/'+NB.id+'/sources:url',{url:u});$('u').value='';refresh()}
+async function addYT(){const u=$('y').value.trim();if(!u)return;await api('POST','/api/notebooks/'+NB.id+'/sources:youtube',{url:u});$('y').value='';refresh()}
+async function addPaste(){const t=$('px').value.trim();if(!t)return;await api('POST','/api/notebooks/'+NB.id+'/sources:paste',{title:$('pt').value||'Pasted text',text:t});$('px').value='';refresh()}
+async function toggleSrc(id,en){await api('PATCH','/api/notebooks/'+NB.id+'/sources/'+id,{enabled:en});refresh()}
+async function delSrc(id){if(!confirm('Remove source?'))return;await api('DELETE','/api/notebooks/'+NB.id+'/sources/'+id);refresh()}
+async function previewSrc(id){const p=await api('GET','/api/notebooks/'+NB.id+'/sources/'+id+'/preview');show('<h3>Source preview</h3><pre>'+esc(p.text)+'</pre><button class="btn" onclick="hide()">Close</button>')}
+function renderChat(hist){$('chat').innerHTML=hist.map(m=>{if(m.role==='user')return '<div class="msg user"><b>You:</b> '+esc(m.content)+'</div>';
+const c=m.citations||[];let body=esc(m.content).replace(/\[(\d+)\]/g,'<span class="cite" title="citation $1">[$1]</span>');
+let q=c.length?'<div class="quotes">'+c.map(x=>'<small><b>['+x.ref+'] '+esc(x.source_title||'')+':</b> '+esc((x.quote||'').slice(0,220))+'</small>').join('')+'</div>':'';
+return '<div class="msg"><div>'+body+'</div>'+q+'<div style="margin-top:6px"><button class="btn" style="font-size:12px" onclick="saveNote(\''+m.id+'\')">💾 Save as note</button></div></div>'}).join('');$('chat').scrollTop=1e9}
+function useNote(id){window._chatNotes=window._chatNotes||[];if(!window._chatNotes.includes(id))window._chatNotes.push(id);toggleNotes();const el=$('chatnotes');if(el){el.style.display='block';el.innerHTML='Using '+window._chatNotes.length+' note(s) as context <button class="btn" style="font-size:11px" onclick="window._chatNotes=[];document.getElementById(\'chatnotes\').style.display=\'none\'">clear</button>'}}
+async function ask(){const m=$('q').value.trim();if(!m)return;$('q').value='';$('chat').innerHTML+='<div class="msg user"><b>You:</b> '+esc(m)+'</div><div class="msg" id="tmp">⏳ thinking…</div>';
+try{const r=await api('POST','/api/notebooks/'+NB.id+'/chat',{message:m,note_ids:(window._chatNotes||[])});const t=$('tmp');if(t)t.remove();const hist=await api('GET','/api/notebooks/'+NB.id+'/chat');renderChat(hist)}catch(e){const t=$('tmp');if(t)t.innerHTML='⚠ '+esc(e.message)}}
+async function saveNote(chat_id){await api('POST','/api/notebooks/'+NB.id+'/notes:from-chat',{chat_id});alert('Saved to notes');loadNotes()}
+function toggleNotes(){const d=$('notesDrawer');d.classList.toggle('open');if(d.classList.contains('open'))loadNotes()}
+async function loadNotes(){if(!NB)return;const ns=await api('GET','/api/notebooks/'+NB.id+'/notes');
+$('notes').innerHTML=ns.map(n=>'<div class="art"><b>'+esc(n.title)+'</b><br/><small>'+esc((n.content_md||'').slice(0,120))+'</small><div style="margin-top:6px;display:flex;gap:6px"><button class="btn" style="font-size:12px" onclick="editNote(\''+n.id+'\')">Edit</button><button class="btn" style="font-size:12px" onclick="delNote(\''+n.id+'\')">Delete</button><a class="btn" style="font-size:12px" href="/api/notebooks/'+NB.id+'/notes/'+n.id+'/pdf">PDF</a><button class="btn" style="font-size:12px" onclick="useNote(\''+n.id+'\')">Chat</button></div></div>').join('')||'<p style="color:#777">No notes.</p>'}
+async function newNote(){const t=prompt('Note title:','Untitled note');if(t===null)return;await api('POST','/api/notebooks/'+NB.id+'/notes',{title:t,content_md:''});loadNotes()}
+async function editNote(id){const ns=await api('GET','/api/notebooks/'+NB.id+'/notes');const n=ns.find(x=>x.id===id);
+show('<h3>Edit note</h3><input type="text" id="et" value="'+esc(n.title)+'"/><br/><br/><textarea class="note" id="ec">'+esc(n.content_md||'')+'</textarea><br/><br/><button class="btn primary" onclick="saveEdit(\''+id+'\')">Save</button> <button class="btn" onclick="hide()">Cancel</button>')}
+async function saveEdit(id){await api('PATCH','/api/notebooks/'+NB.id+'/notes/'+id,{title:$('et').value,content_md:$('ec').value});hide();loadNotes()}
+async function delNote(id){if(!confirm('Delete note?'))return;await api('DELETE','/api/notebooks/'+NB.id+'/notes/'+id);loadNotes()}
+async function mkStudio(kind){let params={};
+if(kind==='flashcards'){params={count:parseInt(prompt('How many cards?','10'))||10,difficulty:'mixed',topic:prompt('Topic (optional):','key concepts')||'key concepts'}}
+if(kind==='quiz'){params={count:parseInt(prompt('How many questions?','5'))||5}}
+if(kind==='report'){const t=prompt('Report type: briefing / study-guide / faq / timeline','briefing')||'briefing';params={type:t}}
+if(kind==='datatable'){const c=prompt('Columns (comma-separated):','Topic,Key point,Source');params={columns:c.split(',').map(s=>s.trim()).filter(Boolean)}}
+if(kind==='audio'){params={length:prompt('Length: brief / standard / extended','brief')||'brief',focus:prompt('Focus for the hosts:','the key ideas')||'the key ideas',tone:'conversational',smart_pause:confirm('Remove silences (smart pause)?')}}
+if(kind==='video'){params={focus:prompt('Video focus:','the key ideas')||'the key ideas'}}
+if(kind==='slides'){params={slide_count:parseInt(prompt('Max slides?','6'))||6}}
+if(kind==='infographic'){params={theme:prompt('Theme: brand / blue / green / dark','brand')||'blue'}}
+show('<h3>⏳ Generating '+kind+'…</h3><p style="color:#666">Grounded in your enabled sources.'+((kind==='audio'||kind==='video')?' Audio/video can take a few minutes — keep this open.':'')+'</p>');
+try{
+if(kind==='audio'||kind==='video'){
+const j=await api('POST','/api/notebooks/'+NB.id+'/studio/'+kind+'?bg=1',params);
+show('<h3>⏳ Generating '+kind+'…</h3><div style="background:#eee;border-radius:8px;height:14px"><div id="pbar" style="background:#c9a227;height:14px;border-radius:8px;width:1%"></div></div><p id="pmsg" style="color:#666;margin-top:6px">queued…</p>');
+const es=new EventSource('/api/jobs/'+j.job_id+'/stream');
+es.onmessage=ev=>{const d=JSON.parse(ev.data);const b=document.getElementById('pbar');if(b)b.style.width=(d.progress||1)+'%';const m=document.getElementById('pmsg');if(m)m.textContent=(d.message||d.status)+' ('+(d.progress||0)+'%)';if(d.status==='done'){es.close();hide();refresh();if(d.result&&d.result.artifact_id)viewArt(d.result.artifact_id)}if(d.status==='error'){es.close();show('<h3>⚠ Failed</h3><pre>'+esc(d.message||'job failed')+'</pre><button class="btn" onclick="hide()">Close</button>')}};
+es.onerror=()=>{es.close()};
+}else{const a=await api('POST','/api/notebooks/'+NB.id+'/studio/'+kind,params);hide();refresh();viewArt(a.id)}
+}catch(e){show('<h3>⚠ Failed</h3><pre>'+esc(e.message)+'</pre><button class="btn" onclick="hide()">Close</button>')}}
+async function viewArt(id){const a=await api('GET','/api/artifacts/'+id);const c=a.content||{};
+if(a.kind==='report'){show('<h3>'+esc(a.title)+'</h3><pre>'+esc(c.md||'')+'</pre>'+(c.citations||[]).map(x=>'<small style="display:block;color:#444">['+x.ref+'] '+esc(x.source_title||'')+': '+esc((x.quote||'').slice(0,160))+'</small>').join('')+'<br/><a class="btn primary" href="/api/artifacts/'+a.id+'/download">Download PDF</a> <button class="btn" onclick="hide()">Close</button>')}
+else if(a.kind==='flashcards'){let i=0;const cards=c.cards||[];const render=()=>{show('<h3>'+esc(a.title)+' ('+(i+1)+'/'+cards.length+')</h3><div class="fc" id="fcc">'+esc(cards[i].front)+'</div><div style="display:flex;gap:8px"><button class="btn" onclick="fcBack()">Flip</button><button class="btn" onclick="fcPrev()">← Prev</button><button class="btn" onclick="fcNext()">Next →</button><button class="btn" onclick="hide()">Close</button></div>');window._fc={cards,i,render}};window.fcBack=()=>{const f=window._fc;$('fcc').textContent=$('fcc').textContent===f.cards[f.i].front?f.cards[f.i].back:f.cards[f.i].front};window.fcPrev=()=>{const f=window._fc;f.i=(f.i-1+f.cards.length)%f.cards.length;f.render()};window.fcNext=()=>{const f=window._fc;f.i=(f.i+1)%f.cards.length;f.render()};render()}
+else if(a.kind==='quiz'){const qs=c.questions||[];let i=0,score=0;const render=()=>{if(i>=qs.length){show('<h3>Score: '+score+'/'+qs.length+'</h3><button class="btn" onclick="hide()">Close</button>');return}const q=qs[i];show('<h3>Q'+(i+1)+'/'+qs.length+': '+esc(q.q)+'</h3>'+(q.choices||[]).map((ch,k)=>'<button class="qchoice" onclick="qAns('+k+')">'+esc(ch)+'</button>').join('')+'<div id="qexp"></div><br/><button class="btn" onclick="hide()">Quit</button>');window._q={qs,i,score,render}};window.qAns=(k)=>{const s=window._q;const q=s.qs[s.i];const btns=[...document.querySelectorAll('.qchoice')];btns.forEach((b,j)=>{if(j===q.answer)b.classList.add('right');else if(j===k)b.classList.add('wrong');b.disabled=true});if(k===q.answer)s.score++;$('qexp').innerHTML='<p style="margin-top:8px"><b>Explanation:</b> '+esc(q.explanation||'')+'</p><button class="btn primary" onclick="qNext()">Next →</button>'};window.qNext=()=>{const s=window._q;s.i++;s.render()};render()}
+else if(a.kind==='mindmap'){const nodes=c.nodes||[];const byId={};nodes.forEach(n=>byId[n.id]=n);
+const rootN=nodes.find(n=>n.id==='root')||{children:nodes.map(n=>n.id)};
+const renderN=n=>{const k=(n.children||[]).map(cid=>byId[cid]).filter(Boolean);if(!k.length)return '<div style="padding:4px 0 4px 18px">• '+esc(n.label||n.id)+'</div>';return '<details open style="margin:4px 0 4px 12px;border:1px solid #e2d3a8;border-radius:8px;padding:6px 8px;background:#fffdf6"><summary style="cursor:pointer;font-weight:600">'+esc(n.label||n.id)+' <small style="color:#8a7a4d">('+k.length+')</small></summary>'+k.map(renderN).join('')+'</details>'};
+show('<h3>'+esc(a.title)+'</h3><p><b>Root:</b> '+esc(c.root||'')+' <small style="color:#666">(click to expand/collapse)</small></p>'+rootN.children.map(cid=>byId[cid]).filter(Boolean).map(renderN).join('')+'<br/><a class="btn primary" href="/api/artifacts/'+a.id+'/download">Download PNG</a> <button class="btn" onclick="hide()">Close</button>')}
+else if(a.kind==='datatable'){show('<h3>'+esc(a.title)+'</h3><table class="data"><tr>'+(c.columns||[]).map(h=>'<th>'+esc(h)+'</th>').join('')+'</tr>'+(c.rows||[]).map(r=>'<tr>'+r.map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>').join('')+'</table><br/><a class="btn" href="/api/artifacts/'+a.id+'/download">⬇ Download CSV</a> <button class="btn" onclick="sendSheets(\''+a.id+'\')">📊 Google Sheets</button> <button class="btn" onclick="hide()">Close</button>')}
+else if(a.kind==='audio'){show('<h3>'+esc(a.title)+'</h3><p style="color:#666">'+(c.duration_sec||0)+'s &middot; '+(c.chapters||[]).length+' chapters</p><audio id="ap" controls style="width:100%" src="/api/artifacts/'+a.id+'/download?inline=1"></audio><div style="margin-top:6px">Speed: <button class="btn" style="font-size:12px" onclick="document.getElementById(\'ap\').playbackRate=0.75">0.75x</button> <button class="btn" style="font-size:12px" onclick="document.getElementById(\'ap\').playbackRate=1">1x</button> <button class="btn" style="font-size:12px" onclick="document.getElementById(\'ap\').playbackRate=1.25">1.25x</button> <button class="btn" style="font-size:12px" onclick="document.getElementById(\'ap\').playbackRate=1.5">1.5x</button> <button class="btn" style="font-size:12px" onclick="document.getElementById(\'ap\').playbackRate=2">2x</button></div><div style="margin-top:8px">'+(c.chapters||[]).map(ch=>'<button class="btn" style="font-size:12px;margin:2px" onclick="document.getElementById(\'ap\').currentTime='+ch.start+'">'+esc(ch.title)+'</button>').join('')+'</div><br/><a class="btn" href="/api/artifacts/'+a.id+'/download">Download audio</a> <button class="btn" onclick="hide()">Close</button>')}
+else if(a.kind==='video'){show('<h3>'+esc(a.title)+'</h3><video controls style="width:100%" src="/api/artifacts/'+a.id+'/download?inline=1"></video><br/><br/><a class="btn" href="/api/artifacts/'+a.id+'/download">Download MP4</a> <button class="btn" onclick="hide()">Close</button>')}
+else if(a.kind==='slides'){show('<h3>'+esc(a.title)+'</h3><p>'+(c.slides||[]).length+' slides (editable text boxes)</p><ul>'+(c.slides||[]).map(s=>'<li>'+esc(s.title)+'</li>').join('')+'</ul><a class="btn primary" href="/api/artifacts/'+a.id+'/download">⬇ Download PPTX</a> <button class="btn" onclick="hide()">Close</button>')}
+else if(a.kind==='infographic'){show('<h3>'+esc(a.title)+'</h3><img style="width:100%;border:1px solid #eee;border-radius:8px" src="/api/artifacts/'+a.id+'/download?inline=1"/><br/><br/><a class="btn" href="/api/artifacts/'+a.id+'/download">⬇ Download PNG</a> <button class="btn" onclick="hide()">Close</button>')}
+else{show('<h3>'+esc(a.title)+'</h3><pre>'+esc(JSON.stringify(c,null,2))+'</pre><button class="btn" onclick="hide()">Close</button>')}
+}
+function mmDL(){const s=document.getElementById('mmsvg');if(!s)return;const x=new XMLSerializer().serializeToString(s);const u=URL.createObjectURL(new Blob([x],{type:'image/svg+xml'}));const a=document.createElement('a');a.href=u;a.download='mindmap.svg';a.click();setTimeout(()=>URL.revokeObjectURL(u),2000)}
+async function doResearch(){const q=prompt('Research question (top web results become sources):');if(!q)return;show('<h3>🔎 Researching…</h3><p style="color:#666">Searching the web and importing sources.</p>');try{const j=await api('POST','/api/notebooks/'+NB.id+'/research?bg=1',{query:q,depth:'fast'});
+show('<h3>🔎 Researching…</h3><div style="background:#eee;border-radius:8px;height:14px"><div id="pbar" style="background:#c9a227;height:14px;border-radius:8px;width:1%"></div></div><p id="pmsg" style="color:#666;margin-top:6px">searching…</p>');
+const es=new EventSource('/api/jobs/'+j.job_id+'/stream');
+es.onmessage=ev=>{const d=JSON.parse(ev.data);const b=document.getElementById('pbar');if(b)b.style.width=(d.progress||1)+'%';const m=document.getElementById('pmsg');if(m)m.textContent=(d.message||d.status)+' ('+(d.progress||0)+'%)';if(d.status==='done'){es.close();const r=d.result||{};hide();alert('Added '+(r.added||[]).length+' sources'+(r.report_id?' + briefing report.':'.'));refresh();if(r.report_id)viewArt(r.report_id)}if(d.status==='error'){es.close();show('<h3>⚠ Research failed</h3><pre>'+esc(d.message||'job failed')+'</pre><button class="btn" onclick="hide()">Close</button>')}};
+es.onerror=()=>{es.close()}}catch(e){show('<h3>⚠ Research failed</h3><pre>'+esc(e.message)+'</pre><button class="btn" onclick="hide()">Close</button>')}}
+window.addEventListener('unhandledrejection',e=>{e.preventDefault();try{alert('Error: '+((e.reason&&e.reason.message)||e.reason||'unknown'))}catch(_){}});
+async function loadQuota(){try{const q=await api('GET','/api/quotas');$('quota').textContent='💬 '+q.chats.used+'/'+q.chats.limit+' · ✨ '+q.studio.used+'/'+q.studio.limit+' · 🔎 '+q.research.used+'/'+q.research.limit}catch(e){}}
+async function resetQuota(){if(!confirm('Reset all daily quotas to zero?'))return;await api('POST','/api/quotas:reset');loadQuota();refresh()}
+async function shareNb(){const s=await api('POST','/api/notebooks/'+NB.id+'/shares',{kind:'notebook'});prompt('Public share link (copy it):',location.origin+s.url)}
+
+let ME=null;
+async function bootAuth(){try{const h=await api('GET','/api/health');if(!h.auth_required){loadAnalytics();return}try{ME=await api('GET','/api/auth/me');$('userpill').textContent='👤 '+ME.username+' · logout';$('userpill').style.cursor='pointer';$('userpill').onclick=doLogout}catch(e){showLogin()}loadAnalytics()}catch(e){}}
+function showLogin(){show('<h3>🔐 Team login</h3><input id="lu" placeholder="username"/><input id="lp" type="password" placeholder="password"/><br/><br/><button class="btn primary" onclick="doLogin()">Login</button> <button class="btn" onclick="doRegister()">Register</button><p style="color:#666"><small>First user becomes admin.</small></p>')}
+async function doLogin(){const u=$('lu').value,p=$('lp').value;ME=await api('POST','/api/auth/login',{username:u,password:p});hide();loadDash();bootAuth()}
+async function doRegister(){const u=$('lu').value,p=$('lp').value;if((p||'').length<4)return alert('password min 4 chars');ME=await api('POST','/api/auth/register',{username:u,password:p});hide();loadDash();bootAuth()}
+async function doLogout(){await api('POST','/api/auth/logout');location.reload()}
+async function seedDemo(){if(!confirm('Load the demo notebook?'))return;const d=await api('POST','/api/demo:seed');loadDash();openNb(d.id)}
+async function drivePicker(){try{const st=await api('GET','/api/integrations/status');if(!st.google_configured){show('<h3>📁 Google Drive</h3><pre>Not configured. Set GOOGLE_CLIENT_ID + GOOGLE_CLIENT_SECRET, restart, then connect.</pre><p>Redirect URI: '+esc(st.redirect_uri)+'</p><button class="btn" onclick="hide()">Close</button>');return}if(!st.google_connected){show('<h3>📁 Google Drive</h3><button class="btn primary" onclick="driveConnect()">Connect Google Drive</button> <button class="btn" onclick="hide()">Close</button>');return}const files=await api('GET','/api/integrations/drive/files');show('<h3>📁 Drive — pick a file</h3>'+(files.map(f=>'<div class="src"><div class="t"><b>'+esc(f.name)+'</b><small>'+esc(f.mimeType)+'</small></div><button onclick="driveImport(\''+f.id+'\')">Import</button></div>').join('')||'<p>No files found.</p>')+'<button class="btn" onclick="hide()">Close</button>')}catch(e){show('<h3>⚠ Drive</h3><pre>'+esc(e.message)+'</pre><button class="btn" onclick="hide()">Close</button>')}}
+async function driveConnect(){const r=await api('GET','/api/integrations/drive/auth-url');location.href=r.url}
+async function driveImport(id){await api('POST','/api/notebooks/'+NB.id+'/sources:drive',{file_id:id});hide();refresh()}
+async function sendSheets(aid){try{const r=await api('POST','/api/artifacts/'+aid+':sheets');window.open(r.spreadsheet_url,'_blank')}catch(e){alert('Sheets: '+e.message)}}
+async function membersMgr(){const ms=await api('GET','/api/notebooks/'+NB.id+'/members');const u=prompt('Members: '+ms.map(m=>m.username+' ('+m.role+')').join(', ')+'\n\nShare with username (blank = cancel):');if(!u)return;const role=prompt('Role (viewer/editor):','viewer')||'viewer';await api('POST','/api/notebooks/'+NB.id+'/members',{username:u,role:role});alert('Shared with '+u)}
+async function loadAnalytics(){try{const h=await api('GET','/api/health');if(!h.auth_required)return;const rows=await api('GET','/api/analytics?days=14');if(!rows.length||!$('analytics'))return;$('analytics').innerHTML='<h4 style="margin:12px 0 6px">📊 Team activity (14d)</h4><table class="data"><tr><th>Day</th><th>User</th><th>Chats</th><th>Studio</th><th>Research</th></tr>'+rows.map(r=>'<tr><td>'+esc(r.day)+'</td><td>'+esc(r.who)+'</td><td>'+r.chats+'</td><td>'+r.studio+'</td><td>'+r.research+'</td></tr>').join('')+'</table>'}catch(e){}}
+init();
+</script><footer style="text-align:center;color:#8a7f63;font-size:12px;padding:12px 8px">🔒 Local-first: your sources stay on this device and are never used for model training.</footer></body></html>

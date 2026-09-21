@@ -1,0 +1,13 @@
+[Unit]
+Description=NotebookLM Clone (local AI research assistant)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/notebooklm-clone/backend
+Environment=STORAGE_DIR=%h/notebooklm-clone/data LLM_PROVIDER=mock TTS_PROVIDER=edge PORT=8000
+ExecStart=%h/notebooklm-clone/.venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

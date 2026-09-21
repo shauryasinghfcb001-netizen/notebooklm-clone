@@ -1,0 +1,6 @@
+data/
+backup-*.tar.gz
+__pycache__/
+*.pyc
+.pytest_cache/
+.env
