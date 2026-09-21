@@ -1,0 +1,21 @@
+services:
+  api:
+    build: .
+    ports:
+      - "${PORT:-8000}:8000"
+    volumes:
+      - ./data:/data
+    environment:
+      - LLM_PROVIDER=${LLM_PROVIDER:-mock}
+      - LLM_MODEL=${LLM_MODEL:-gpt-4o-mini}
+      - OPENAI_BASE_URL=${OPENAI_BASE_URL:-https://api.openai.com/v1}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - OLLAMA_URL=${OLLAMA_URL:-http://host.docker.internal:11434}
+      - TTS_PROVIDER=${TTS_PROVIDER:-edge}
+  # Optional local LLM:
+  # ollama:
+  #   image: ollama/ollama
+  #   ports: ["11434:11434"]
+  #   volumes: [ollama:/root/.ollama]
+# volumes:
+#   ollama:
