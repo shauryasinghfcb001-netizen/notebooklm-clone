@@ -191,6 +191,17 @@ def test_integrations_status():
     r = c.get("/api/integrations/status").json()
     assert "google_configured" in r and "redirect_uri" in r
     assert r["redirect_uri"].endswith("/api/integrations/drive/callback")
+    assert {x["id"] for x in r["capabilities"]} >= {"google-ai", "speech", "video-generation"}
+
+
+def test_understanding_agent_grounded_route():
+    r = c.post(f"/api/notebooks/{NB}/understanding", json={"goal": "Explain this simply to a beginner"})
+    assert r.status_code == 200, r.text
+    brief = r.json()
+    assert brief["audience_level"] == "beginner"
+    assert brief["recommended_format"] == "plain-language guide"
+    assert len(brief["learning_path"]) == 3
+    assert brief["grounding"] and brief["provider"] == "local-planner"
 
 
 def test_drive_gated(monkeypatch):
