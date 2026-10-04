@@ -40,6 +40,16 @@ def configured() -> bool:
     return bool(os.environ.get("GOOGLE_CLIENT_ID") and os.environ.get("GOOGLE_CLIENT_SECRET"))
 
 
+def capability_catalog() -> list[dict]:
+    """Integration contract for features that are intentionally not enabled yet."""
+    return [
+        {"id": "google-drive", "provider": "Google", "status": "ready" if configured() else "setup_required", "purpose": "Import Drive files and export data tables to Sheets", "env": ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"]},
+        {"id": "google-ai", "provider": "Google AI / Vertex AI", "status": "planned", "purpose": "Optional generation provider for the Understanding Agent", "env": ["GOOGLE_API_KEY or VERTEX_*"], "not_active": True},
+        {"id": "speech", "provider": "Google Cloud Speech-to-Text", "status": "planned", "purpose": "Future voice input; no microphone capture is implemented", "env": ["GOOGLE_APPLICATION_CREDENTIALS"], "not_active": True},
+        {"id": "video-generation", "provider": "Google Veo / compatible provider", "status": "planned", "purpose": "Future generated-video provider; current video is locally rendered", "env": ["VIDEO_GENERATION_API_KEY"], "not_active": True},
+    ]
+
+
 def _libs():
     try:
         from google_auth_oauthlib.flow import Flow

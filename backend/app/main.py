@@ -27,7 +27,7 @@ from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from rapidfuzz import fuzz
 
-from . import auth, integrations, media, vectors
+from . import auth, integrations, media, understanding, vectors
 
 
 # ---------------- config ----------------
@@ -490,7 +490,7 @@ def int_status(req: Request):
     with db() as c:
         connected = integrations.load_token(c) is not None
     return {"google_configured": integrations.configured(), "google_connected": connected,
-            "redirect_uri": origin + "/api/integrations/drive/callback"}
+            "redirect_uri": origin + "/api/integrations/drive/callback", "capabilities": integrations.capability_catalog()}
 
 
 @app.get("/api/integrations/drive/auth-url")
@@ -827,6 +827,18 @@ async def suggest(nbid: str):
     ]
     if titles: base[0] = f"What are the key themes in {titles[0]}?"
     return {"prompts": base}
+
+
+@app.post("/api/notebooks/{nbid}/understanding")
+async def understanding_agent(nbid: str, req: Request):
+    """Recommend the next explanation format without making unsupported claims."""
+    get_nb(nbid)
+    body = await req.json()
+    goal = (body.get("goal") or "").strip()
+    passages = retrieve(nbid, goal or "key ideas", k=8, only_ids=body.get("only_source_ids") or None)
+    if not passages:
+        raise HTTPException(400, "Add or enable a source before asking the Understanding Agent.")
+    return understanding.build_brief(goal, passages)
 
 # ---------------- API: notes ----------------
 @app.get("/api/notebooks/{nbid}/notes")

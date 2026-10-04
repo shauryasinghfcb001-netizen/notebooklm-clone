@@ -17,6 +17,7 @@ Docs: [`PLAN.md`](PLAN.md) (master plan) · [`PLAN_CHECK.md`](PLAN_CHECK.md)
 | 📝 Notes | Rich-text CRUD, one-click notes from any chat answer |
 | ✨ Studio (9 tools) | **Report, Flashcards, Quiz (scored), Mind Map, Data Table (+CSV, **Send to Google Sheets**), Audio Overview (MP3 + chapters), Video Overview (MP4), Slide Deck (PPTX), Infographic (PNG)** · Report→PDF, Note→PDF |
 | 🔎 Research | Web search (DDG → Wikipedia fallbacks) auto-imports top results as sources + writes a briefing report |
+| 🧭 Understanding Agent | Reads a learner's goal plus enabled sources, then recommends a grounded beginner/general/advanced learning route |
 | 🔗 Sharing | Token-based public links: human HTML page (`/s/:token`) + JSON API |
 | 📊 Quotas | Daily chat/studio/research counters with UI banner |
 | 📱 PWA | Installable (192/512/maskable icons), offline shell caching, background audio |
@@ -27,6 +28,16 @@ Docs: [`PLAN.md`](PLAN.md) (master plan) · [`PLAN_CHECK.md`](PLAN_CHECK.md)
 
 Works **fully offline** (mock LLM + mock TTS) and upgrades automatically with
 real providers (OpenAI-compatible / Ollama for text, edge-tts voices for audio).
+
+### Personal agent and future Google integrations
+
+The **Understanding Agent** is deliberately local and source-grounded today: it
+chooses a clear next format and learning path from the learner's stated goal.
+The Integrations status API also exposes a safe capability catalog for optional
+Google AI/Vertex, Speech-to-Text, and video-generation providers. Those three
+are marked `planned`: no credentials, microphone capture, or remote generation
+is activated until a provider adapter is intentionally configured. Google Drive
+and Sheets OAuth remain the currently supported Google connection.
 
 ## 🖥️ Install everywhere
 Windows · macOS · Linux · iPhone/iPad · Android → **[docs/INSTALL.md](docs/INSTALL.md)**
@@ -103,4 +114,3 @@ POST .../studio/:kind?bg=1  → {job_id}   GET /api/jobs/:jid[/stream] (SSE prog
   (real voice on any normal network; the sandbox IP is rate-limited by Microsoft).
 - Video/slides/infographic render locally (ffmpeg via imageio-ffmpeg + Pillow).
 - Long audio/video generations run as background jobs with live SSE progress bars.
-

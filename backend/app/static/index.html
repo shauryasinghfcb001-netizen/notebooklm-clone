@@ -89,6 +89,8 @@ textarea.note{width:100%;min-height:120px;border:1px solid #d4d7dc;border-radius
       <div id="chatnotes" style="display:none;padding:6px 10px;background:#f3ead0;border-top:1px solid #d9c98f;font-size:12px"></div><div class="chatinput"><input id="q" placeholder="Ask about your sources…" onkeydown="if(event.key==='Enter')ask()"/>
       <button class="btn primary" onclick="ask()">Ask</button></div></div>
     <div class="panel"><h2>✨ Studio</h2><div class="body">
+      <button class="btn primary" style="width:100%;margin-bottom:10px" onclick="understand()">🧭 Understanding Agent</button>
+      <p style="font-size:12px;color:#666;margin:-4px 0 10px">Chooses a clear learning route from your sources.</p>
       <div class="toolgrid">
         <div class="tool" onclick="mkStudio('report')"><b>📄 Report</b><span>briefing / guide</span></div>
         <div class="tool" onclick="mkStudio('flashcards')"><b>🗂 Flashcards</b><span>Q&A cards</span></div>
@@ -131,6 +133,7 @@ $('arts').innerHTML='<h4 style="margin:6px 0">Artifacts</h4>'+(arts.map(a=>'<div
 const hist=await api('GET','/api/notebooks/'+NB.id+'/chat');renderChat(hist);
 try{const sg=await api('POST','/api/notebooks/'+NB.id+'/chat:suggest');$('sugg').innerHTML=(sg.prompts||[]).map(p=>'<button class="btn" style="font-size:12px" onclick="askSuggest(this)">'+esc(p)+'</button>').join('')}catch(e){}}
 function askSuggest(el){$('q').value=el.textContent;ask()}
+async function understand(){const goal=prompt('What should this help you understand? (for example: Explain simply, help me decide, or give an advanced deep dive)','Explain the key ideas simply');if(goal===null)return;show('<h3>🧭 Understanding Agent</h3><p style="color:#666">Reading enabled sources and choosing the clearest route…</p>');try{const r=await api('POST','/api/notebooks/'+NB.id+'/understanding',{goal:goal});const terms=(r.key_terms||[]).map(esc).join(' · ')||'No recurring terms detected';const path=(r.learning_path||[]).map((x,i)=>'<li><b>Step '+(i+1)+'.</b> '+esc(x)+'</li>').join('');const sources=(r.grounding||[]).map(x=>esc(x.source_title)).join(', ');show('<h3>🧭 Your understanding route</h3><p><b>Recommended:</b> '+esc(r.recommended_format)+'</p><p style="color:#666">'+esc(r.why)+'</p><ol style="padding-left:20px;line-height:1.7">'+path+'</ol><p><b>Key terms:</b> '+terms+'</p><p style="font-size:12px;color:#666">Grounded in: '+sources+'. This is a local planning step; Google AI, speech input, and generated-video providers remain optional future integrations.</p><button class="btn primary" onclick="hide()">Got it</button>')}catch(e){show('<h3>⚠ Understanding Agent</h3><pre>'+esc(e.message)+'</pre><button class="btn" onclick="hide()">Close</button>')}}
 async function uploadFile(){const f=$('f').files[0];if(!f)return alert('Choose a file');const fd=new FormData();fd.append('file',f);$('f').value='';await api('POST','/api/notebooks/'+NB.id+'/sources:file',null,fd);refresh()}
 async function addURL(){const u=$('u').value.trim();if(!u)return;await api('POST','/api/notebooks/'+NB.id+'/sources:url',{url:u});$('u').value='';refresh()}
 async function addYT(){const u=$('y').value.trim();if(!u)return;await api('POST','/api/notebooks/'+NB.id+'/sources:youtube',{url:u});$('y').value='';refresh()}
